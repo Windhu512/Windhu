@@ -146,6 +146,7 @@ Boxes["Box Buku Ilmiah"].push("Ensiklopedia X")
 Boxes["Box Buku Ilmiah"].push("Biology")
 Boxes["Box Buku Sejarah"].push("Jejak Zaman Neolithikum")
 Boxes["Box Buku Sejarah"].push("Sejarah Islam")
+Boxes["Box Buku Ilmiah"].push("Ilmiah banget")
 
 queue = Queue()
 
