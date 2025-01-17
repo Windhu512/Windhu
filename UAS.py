@@ -1,183 +1,197 @@
-class Stack:
-    def __init__(self):
-        self.box = []
-
-    def push(self, item):
-        self.box.append(item)
-
-    def pop(self):
-        if not self.is_empty():
-            return self.box.pop()
-        else:
-            raise IndexError("Stack kosong")
-
-    def peek(self):
-        if not self.is_empty():
-            return self.box[-1]
-        else:
-            raise IndexError("Stack kosong")
-
-    def is_empty(self):
-        return len(self.box) == 0
-
-    def size(self):
-        return len(self.box)
-
-    def display(self):
-        if self.is_empty():
-            print("Box kosong")
-        else:
-            print("Isi Box (Top -> Bottom):")
-            for item in reversed(self.box):
-                print(f"| {item} |")
-            print(" -----")
+import matplotlib.pyplot as plt
+from rich.console import Console
+from rich.table import Table
 
 
 class Queue:
-    def __init__(self):
-        self.queue = []
+    def __init__(self, max_size):
+        self.max_size = max_size
+        self.front = -1
+        self.rear = -1
+        self.data = [None] * self.max_size
 
-    def enqueue(self, item):
-        self.queue.append(item)
-
-    def dequeue(self):
-        if not self.is_empty():
-            return self.queue.pop(0)
-        else:
-            raise IndexError("Antrian kosong")
-
-    def peek(self):
-        if not self.is_empty():
-            return self.queue[0]
-        else:
-            raise IndexError("Antrian kosong")
+    def is_full(self):
+        return (self.rear + 1) % self.max_size == self.front
 
     def is_empty(self):
-        return len(self.queue) == 0
+        return self.front == -1
 
-    def size(self):
-        return len(self.queue)
-
-    def display(self):
-        if self.is_empty():
-            print("Antrian kosong.")
+    def enqueue(self, value):
+        if self.is_full():
+            print("Maaf, queue penuh.")
         else:
-            print("Isi Antrian (Depan -> Belakang):")
-            for index, (nama, buku) in enumerate(self.queue, start=1):
-                print(f"{index}. Nama: {nama}, Buku: {buku}")
+            if self.is_empty():
+                self.front = self.rear = 0
+            else:
+                self.rear = (self.rear + 1) % self.max_size
+            self.data[self.rear] = value
+            print(f"Data {value['np']} masuk ke queue.")
+            self.visualize()
+
+    def dequeue(self):
+        if self.is_empty():
+            print("Data telah kosong!")
+        else:
+            print(f"Data yang terambil: {self.data[self.front]['np']}")
+            self.data[self.front] = None
+            if self.front == self.rear:
+                self.front = self.rear = -1
+            else:
+                self.front = (self.front + 1) % self.max_size
+            self.visualize()
+
+    def print_queue(self, highlight_name=None):
+        if self.is_empty():
+            print("Queue kosong.")
+        else:
+            table = Table(title="Data yang terdapat dalam queue")
+            table.add_column("No", justify="center")
+            table.add_column("Nama Penumpang", justify="left")
+            table.add_column("Alamat Penumpang", justify="left")
+            table.add_column("Jenis Kelamin", justify="center")
+            table.add_column("No Tempat Duduk", justify="center")
+            table.add_column("Biaya", justify="right")
+            i = self.front
+            idx = 1
+            while True:
+                p = self.data[i]
+                name_display = f"[red]{p['np']}[/red]" if p['np'] == highlight_name else p['np']
+                table.add_row(str(idx), name_display, p['ap'], p['jk'], p['td'], str(350000))
+                if i == self.rear:
+                    break
+                i = (i + 1) % self.max_size
+                idx += 1
+            console = Console()
+            console.print(table)
+
+    def clear(self):
+        self.front = self.rear = -1
+        self.data = [None] * self.max_size
+        print("\nSekarang queue kosong.")
+        self.visualize()
+
+    def visualize(self):
+        fig, ax = plt.subplots(figsize=(20, 4))
+        ax.set_xlim(-1, self.max_size)
+        ax.set_ylim(-1, 2)
+        for i in range(self.max_size):
+            rect = plt.Rectangle((i, 0), 1, 1, edgecolor='black', facecolor='white')
+            ax.add_patch(rect)
+            if self.data[i] is not None:
+                ax.text(i + 0.5, 0.5, str(self.data[i]['np']), ha='center', va='center', fontsize=12)
+        if not self.is_empty():
+            ax.text(self.front, -0.5, 'Front', ha='center', va='center', color='red')
+            ax.text(self.rear, 1.5, 'Rear', ha='center', va='center', color='blue')
+        plt.axis('off')
+        plt.show()
+
+    def search(self, name):
+        if self.is_empty():
+            print("Queue kosong.")
+        else:
+            i = self.front
+            found = False
+            while True:
+                if self.data[i] is not None and self.data[i]['np'] == name:
+                    found = True
+                    break
+                if i == self.rear:
+                    break
+                i = (i + 1) % self.max_size
+            if found:
+                print(f"\nData {name} ditemukan:")
+                self.print_queue(highlight_name=name)
+            else:
+                print(f"Data {name} tidak ditemukan dalam queue.")
+
+    def bubble_sort(self):
+        if self.is_empty():
+            print("Queue kosong, tidak bisa melakukan sorting.")
+            return
+        n = (self.rear - self.front + self.max_size) % self.max_size + 1
+        for i in range(n):
+            for j in range(0, n - i - 1):
+                idx1 = (self.front + j) % self.max_size
+                idx2 = (self.front + j + 1) % self.max_size
+                if self.data[idx1]['np'] > self.data[idx2]['np']:
+                    self.data[idx1], self.data[idx2] = self.data[idx2], self.data[idx1]
+        print("Queue telah di-sort berdasarkan nama penumpang menggunakan Bubble Sort.")
 
 
-def pilih_kategori():
-    print("\nHalo! Mau Pilih Buku Kategori Apa?")
-    print("Kalau Mau Buku Fiksi Tekan 1, Ilmiah Tekan 2, Sejarah Tekan 3")
-    pilihan = input("Masukkan pilihan Anda (1/2/3): ")
-
-    if pilihan == "1":
-        print("Anda memilih kategori: Buku Fiksi")
-        return "Box Buku Fiksi"
-    elif pilihan == "2":
-        print("Anda memilih kategori: Buku Ilmiah")
-        return "Box Buku Ilmiah"
-    elif pilihan == "3":
-        print("Anda memilih kategori: Buku Sejarah")
-        return "Box Buku Sejarah"
-    else:
-        print("Pilihan tidak valid. Silakan coba lagi.")
-        return None
+# Fungsi validasi
+def validate_gender(jk):
+    return jk.upper() in ('L', 'P')
 
 
-def menu_box(box_name, box_stack, queue):
+def validate_seat_number(jk, td, occupied_seats):
+    try:
+        seat_number = int(td)
+        if jk.upper() == 'L':
+            return 8 <= seat_number <= 20 and seat_number not in occupied_seats
+        elif jk.upper() == 'P':
+            return 1 <= seat_number <= 6 and seat_number not in occupied_seats
+    except ValueError:
+        return False
+    return False
+
+
+# Menu Utama
+if __name__ == "__main__":
+    queue_size = int(input("Masukkan jumlah maksimal data dalam queue: "))
+    queue = Queue(queue_size)
+    occupied_seats = set()
+
     while True:
-        print(f"\nAnda berada di {box_name}.")
-        print("1. Lihat daftar buku")
-        print("2. Ambil buku")
-        print("3. Letakkan buku")
-        print("4. Kembali ke menu sebelumnya")
-        print("5. Lanjutkan ke antrian")
-        pilihan = input("Masukkan pilihan Anda (1/2/3/4/5): ")
+        print("\nMenu:")
+        print("1. Tambahkan data ke queue")
+        print("2. Hapus data dari queue")
+        print("3. Tampilkan isi queue")
+        print("4. Cari data dalam queue")
+        print("5. Sorting data dalam queue")
+        print("6. Bersihkan queue")
+        print("0. Keluar")
 
-        if pilihan == "1":
-            print(f"\nDaftar buku dalam {box_name}:")
-            box_stack.display()
+        choice = input("Pilih menu: ")
 
-        elif pilihan == "2":
-            try:
-                buku_diambil = box_stack.pop()
-                print(f"Buku '{buku_diambil}' berhasil diambil dari {box_name}.")
-                return buku_diambil
-            except IndexError:
-                print("Tidak ada buku untuk diambil.")
+        if choice == "1":
+            np = input("Masukkan nama penumpang: ")
+            ap = input("Masukkan alamat penumpang: ")
+            jk = input("Masukkan jenis kelamin (L/P): ")
 
-        elif pilihan == "3":
-            buku_baru = input("Masukkan nama buku yang ingin diletakkan: ")
-            box_stack.push(buku_baru)
-            print(f"Buku '{buku_baru}' berhasil ditambahkan ke {box_name}.")
+            if not validate_gender(jk):
+                print("Jenis kelamin tidak valid!")
+                continue
 
-        elif pilihan == "4":
-            print("Kembali ke menu utama.")
+            td = input("Masukkan nomor tempat duduk: ")
+
+            if not validate_seat_number(jk, td, occupied_seats):
+                print("Nomor tempat duduk tidak valid atau sudah ditempati!")
+                continue
+
+            occupied_seats.add(int(td))
+            queue.enqueue({"np": np, "ap": ap, "jk": jk.upper(), "td": td})
+
+        elif choice == "2":
+            queue.dequeue()
+
+        elif choice == "3":
+            queue.print_queue()
+
+        elif choice == "4":
+            name = input("Masukkan nama yang ingin dicari: ")
+            queue.search(name)
+
+        elif choice == "5":
+            queue.bubble_sort()
+            queue.print_queue()
+
+        elif choice == "6":
+            queue.clear()
+            occupied_seats.clear()
+
+        elif choice == "0":
+            print("Keluar dari program. Sampai jumpa!")
             break
 
-        elif pilihan == "5":
-            print("Anda harus mengambil buku terlebih dahulu sebelum masuk ke antrian.")
         else:
-            print("Pilihan tidak valid. Silakan coba lagi.")
-
-
-def proses_antrian(queue):
-    if queue.is_empty():
-        print("Tidak ada antrian saat ini.")
-    else:
-        print("\nMemproses antrian:")
-        pelanggan, buku = queue.dequeue()
-        print(f"Giliran {pelanggan} memproses buku '{buku}'.")
-        print("Proses selesai. Kembali ke menu utama.")
-
-
-Boxes = {
-    "Box Buku Fiksi": Stack(),
-    "Box Buku Ilmiah": Stack(),
-    "Box Buku Sejarah": Stack()
-}
-
-Boxes["Box Buku Fiksi"].push("One Piece")
-Boxes["Box Buku Fiksi"].push("Naruto")
-Boxes["Box Buku Fiksi"].push("Sousou no Frieren")
-Boxes["Box Buku Ilmiah"].push("Ensiklopedia X")
-Boxes["Box Buku Ilmiah"].push("Biology")
-Boxes["Box Buku Sejarah"].push("Jejak Zaman Neolithikum")
-Boxes["Box Buku Sejarah"].push("Sejarah Islam")
-
-queue = Queue()
-
-while True:
-    print("\nMenu Utama:")
-    print("1. Pilih kategori buku")
-    print("2. Proses antrian")
-    print("3. Keluar")
-    print("4. Lihat antrean")
-    pilihan = input("Masukkan pilihan Anda (1/2/3/4): ")
-
-    if pilihan == "1":
-        box_terpilih = pilih_kategori()
-        if box_terpilih and box_terpilih in Boxes:
-            buku_diambil = menu_box(box_terpilih, Boxes[box_terpilih], queue)
-            if buku_diambil:
-                nama = input("Masukkan nama Anda untuk masuk ke antrian: ")
-                queue.enqueue((nama, buku_diambil))
-                print(f"{nama} dengan buku '{buku_diambil}' berhasil masuk ke antrian.")
-        else:
-            print("Pilihan tidak valid. Silakan coba lagi.")
-
-    elif pilihan == "2":
-        proses_antrian(queue)
-
-    elif pilihan == "3":
-        print("Terima kasih! Program selesai.")
-        break
-
-    elif pilihan == "4":
-        print("\nMelihat isi antrean:")
-        queue.display()
-
-    else:
-        print("Pilihan tidak valid. Silakan coba lagi.")
+            print("Pilihan tidak valid!")
