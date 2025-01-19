@@ -258,11 +258,14 @@ if __name__ == "__main__":
                 print("Jenis kelamin tidak valid!")
                 continue
 
-            tempatDuduk = input("Masukkan nomor tempat duduk  : ")
+            check_seat = True
+            while check_seat:
+                tempatDuduk = input("Masukkan nomor tempat duduk  : ")
 
-            if not validate_seat_number(jenisKelamin, tempatDuduk, occupied_seats):
-                print("Nomor tempat duduk tidak valid atau sudah ditempati!")
-                continue
+                if not validate_seat_number(jenisKelamin, tempatDuduk, occupied_seats):
+                    print("Nomor tempat duduk tidak valid atau sudah ditempati!")
+                else:
+                    check_seat = False
 
             occupied_seats.add(int(tempatDuduk))
             queue.enqueue({"np": namaPenumpang, "ap": alamatPenumpang, "jk": jenisKelamin.upper(), "td": tempatDuduk})
@@ -275,6 +278,7 @@ if __name__ == "__main__":
             uang_pembayaran = int(input("Masukan uang pembayaran            : Rp. "))
             if not validate_uang_pembayaran(uang_pembayaran, grand_total):
                 print("Uang pembayaran harus lebih dari total pembayaran")
+                queue.dequeue()
                 continue
 
             kembalian = uang_pembayaran - grand_total
