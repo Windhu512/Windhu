@@ -33,14 +33,17 @@ class Queue:
             print("Data telah kosong!")
         else:
             print(f"Data yang terambil: {self.data[self.front]['np']}")
-            self.data[self.front] = None
-            if self.front == self.rear:
-                self.front = self.rear = -1
-            else:
-                self.front = (self.front + 1) % self.max_size
+            for i in range(self.front, self.rear):
+                self.data[i] = self.data[i + 1]
+            self.data[self.rear] = None
+            self.rear -= 1
 
-            print(f"self: ${self}")
+            if self.rear < self.front:
+                self.front = self.rear = -1
+
+            print(f"self: {self}")
             self.visualize()
+
 
     def print_queue(self, highlight_name=None):
         if self.is_empty():
@@ -213,7 +216,16 @@ def print_ticket(np, ap, jk, td, jb, hs):
 
 # Menu Utama
 if __name__ == "__main__":
-    queue_size = int(input("Masukkan jumlah maksimal data dalam queue: "))
+    while True:
+        try:
+            queue_size = int(input("Masukkan jumlah maksimal data dalam queue: "))
+            if queue_size <= 0:
+                print("Jumlah maksimal queue harus lebih dari 0. Silakan coba lagi.")
+                continue
+            break
+        except ValueError:
+            print("Mohon untuk memasukkan angka untuk jumlah maksimal queue")
+
     queue = Queue(queue_size)
     occupied_seats = set()
 
@@ -235,28 +247,45 @@ if __name__ == "__main__":
             print("#------------------  PROGRAM TIKET BUS  ------------------#")
             print("#---------------------------------------------------------#")
             print("")
-            jenisTiket = input("Silahkan Pilih Tiket (SE/EP/EK): ")
+            while True:
+                jenisTiket = input("Silahkan Pilih Tiket (SE/EP/EK): ")
 
-            if not validate_jenis_tiket(jenisTiket):
-                print("Pilihan tiket tidak tersedia!")
-                continue
+                if not validate_jenis_tiket(jenisTiket):
+                    print("Pilihan tiket tidak tersedia! Harap pilih antara SE, EP, atau EK.")
+                else:
+                    break
 
             tiket_info = get_tiket_info(jenisTiket)
             kelas_bus, harga, pajak = tiket_info
             print(f"Kelas bus yang dipilih       : {kelas_bus}")
             print(f"Dengan Harga                 : Rp. {harga:,} / orang")
 
-            jumlahBeli = int(input("Masukan Jumlah Beli          : "))
+            while True:
+                try:
+                    jumlahBeli = int(input("Masukan Jumlah Beli          : "))
+                    break
+                except ValueError:
+                    print("Jumlah beli harus berupa angka. Silakan coba lagi.")
+
             total_harga = harga * jumlahBeli
             total_pajak = total_harga * (pajak / 100)
             grand_total = total_harga + total_pajak
-            namaPenumpang = input("Masukkan nama penumpang      : ")
-            alamatPenumpang = input("Masukkan alamat penumpang    : ")
-            jenisKelamin = input("Masukkan jenis kelamin (L/P) : ")
 
-            if not validate_gender(jenisKelamin):
+            while True:
+                namaPenumpang = input("Masukkan nama penumpang      : ")
+                if not namaPenumpang.isalpha():
+                    print("Nama penumpang harus berupa huruf saja. Silakan coba lagi.")
+                else:
+                    break
+
+            alamatPenumpang = input("Masukkan alamat penumpang    : ")
+
+            while True:
+              jenisKelamin = input("Masukkan jenis kelamin (L/P) : ")
+              if not validate_gender(jenisKelamin):
                 print("Jenis kelamin tidak valid!")
-                continue
+              else:
+                  break
 
             check_seat = True
             while check_seat:
@@ -313,3 +342,4 @@ if __name__ == "__main__":
 
         else:
             print("Pilihan tidak valid!")
+
