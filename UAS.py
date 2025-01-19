@@ -38,6 +38,8 @@ class Queue:
                 self.front = self.rear = -1
             else:
                 self.front = (self.front + 1) % self.max_size
+
+            print(f"self: ${self}")
             self.visualize()
 
     def print_queue(self, highlight_name=None):
@@ -74,15 +76,18 @@ class Queue:
         fig, ax = plt.subplots(figsize=(20, 4))
         ax.set_xlim(-1, self.max_size)
         ax.set_ylim(-1, 2)
+        ax.axis('off')
+
         for i in range(self.max_size):
             rect = plt.Rectangle((i, 0), 1, 1, edgecolor='black', facecolor='white')
             ax.add_patch(rect)
             if self.data[i] is not None:
                 ax.text(i + 0.5, 0.5, str(self.data[i]['np']), ha='center', va='center', fontsize=12)
+
         if not self.is_empty():
-            ax.text(self.front, -0.5, 'Front', ha='center', va='center', color='red')
-            ax.text(self.rear, 1.5, 'Rear', ha='center', va='center', color='blue')
-        plt.axis('off')
+            ax.text(self.front + 0.5, -0.5, 'Front', ha='center', va='center', color='red', fontsize=14)
+            ax.text(self.rear + 0.5, 1.5, 'Rear', ha='center', va='center', color='blue', fontsize=14)
+
         plt.show()
 
     def search(self, name):
@@ -118,21 +123,92 @@ class Queue:
         print("Queue telah di-sort berdasarkan nama penumpang menggunakan Bubble Sort.")
 
 
-# Fungsi validasi
 def validate_gender(jk):
     return jk.upper() in ('L', 'P')
 
 
-def validate_seat_number(jk, td, occupied_seats):
+def validate_seat_number(jenis_kelamin, tempat_duduk, occupied_seats):
     try:
-        seat_number = int(td)
-        if jk.upper() == 'L':
+        seat_number = int(tempat_duduk)
+        if jenis_kelamin.upper() == 'L':
             return 8 <= seat_number <= 20 and seat_number not in occupied_seats
-        elif jk.upper() == 'P':
+        elif jenis_kelamin.upper() == 'P':
             return 1 <= seat_number <= 6 and seat_number not in occupied_seats
     except ValueError:
         return False
     return False
+
+
+def validate_jenis_tiket(jenisTiket):
+    return jenisTiket.upper() in ('SE', 'EP', 'EK')
+
+
+def get_tiket_info(jenisTiket):
+    tiket_mapping = {
+        'SE': ("Super Eksklusif", 350000, 2.5),
+        'EP': ("Eksekutif Plus", 325000, 2),
+        'EK': ("Eksekutif", 300000, 1.5),
+    }
+    return tiket_mapping.get(jenisTiket.upper())
+
+
+def validate_uang_pembayaran(up, gt):
+    return up >= gt
+
+
+def check_bonus(total, jenis_tiket):
+    bonus_message = "Tidak Dapat Bonus"
+    print(f"cb total : {total}")
+    print(f"cb jt : {jenis_tiket}")
+    if jenis_tiket.upper() == 'SE':
+        if 5250000 <= total <= 7000000:
+            bonus_message = "Anda Mendapatkan Bonus Liburan Ke Bali"
+        elif 4550000 <= total <= 4900000:
+            bonus_message = "Anda Mendapatkan Bonus Liburan Ke Surabaya"
+        elif 3850000 <= total <= 4200000:
+            bonus_message = "Anda Mendapatkan Bonus Liburan Ke Yogyakarta"
+        elif 3150000 <= total <= 3500000:
+            bonus_message = "Anda Mendapatkan Bonus Liburan Ke Bandung"
+        elif 2100000 <= total <= 2800000:
+            bonus_message = "Anda Mendapatkan Bonus Liburan Ke Jakarta"
+    elif jenis_tiket.upper() == 'EP':  # Eksekutif Plus
+        if 5000000 <= total <= 6500000:
+            bonus_message = "Anda Mendapatkan Bonus Liburan Ke Bali"
+        elif 4500000 <= total <= 4900000:
+            bonus_message = "Anda Mendapatkan Bonus Liburan Ke Surabaya"
+        elif 3800000 <= total <= 4200000:
+            bonus_message = "Anda Mendapatkan Bonus Liburan Ke Yogyakarta"
+        elif 3000000 <= total <= 3500000:
+            bonus_message = "Anda Mendapatkan Bonus Liburan Ke Bandung"
+        elif 2100000 <= total <= 2800000:
+            bonus_message = "Anda Mendapatkan Bonus Liburan Ke Jakarta"
+    elif jenis_tiket.upper() == 'EK':
+        if 4500000 <= total <= 6000000:
+            bonus_message = "Anda Mendapatkan Bonus Liburan Ke Bali"
+        elif 4000000 <= total <= 4300000:
+            bonus_message = "Anda Mendapatkan Bonus Liburan Ke Surabaya"
+        elif 3800000 <= total <= 3900000:
+            bonus_message = "Anda Mendapatkan Bonus Liburan Ke Yogyakarta"
+        elif 3500000 <= total <= 3700000:
+            bonus_message = "Anda Mendapatkan Bonus Liburan Ke Bandung"
+        elif 3000000 <= total <= 3300000:
+            bonus_message = "Anda Mendapatkan Bonus Liburan Ke Jakarta"
+    return bonus_message
+
+
+def print_ticket(np, ap, jk, td, jb, hs):
+    table = Table(title="")
+    table.add_column("No", justify="center")
+    table.add_column("Nama Penumpang", justify="left")
+    table.add_column("Alamat Penumpang", justify="left")
+    table.add_column("Jenis Kelamin", justify="center")
+    table.add_column("No Tempat Duduk", justify="center")
+    table.add_column("Jumalh Beli", justify="center")
+    table.add_column("Biaya", justify="center")
+
+    table.add_row(str(1), np, ap, jk, td, f"{jb}", f"Rp. {int(hs)}")
+    console = Console()
+    console.print(table)
 
 
 # Menu Utama
@@ -154,22 +230,60 @@ if __name__ == "__main__":
         choice = input("Pilih menu: ")
 
         if choice == "1":
-            np = input("Masukkan nama penumpang: ")
-            ap = input("Masukkan alamat penumpang: ")
-            jk = input("Masukkan jenis kelamin (L/P): ")
+            print("")
+            print("#---------------------------------------------------------#")
+            print("#------------------  PROGRAM TIKET BUS  ------------------#")
+            print("#---------------------------------------------------------#")
+            print("")
+            jenisTiket = input("Silahkan Pilih Tiket (SE/EP/EK): ")
 
-            if not validate_gender(jk):
+            if not validate_jenis_tiket(jenisTiket):
+                print("Pilihan tiket tidak tersedia!")
+                continue
+
+            tiket_info = get_tiket_info(jenisTiket)
+            kelas_bus, harga, pajak = tiket_info
+            print(f"Kelas bus yang dipilih       : {kelas_bus}")
+            print(f"Dengan Harga                 : Rp. {harga:,} / orang")
+
+            jumlahBeli = int(input("Masukan Jumlah Beli          : "))
+            total_harga = harga * jumlahBeli
+            total_pajak = total_harga * (pajak / 100)
+            grand_total = total_harga + total_pajak
+            namaPenumpang = input("Masukkan nama penumpang      : ")
+            alamatPenumpang = input("Masukkan alamat penumpang    : ")
+            jenisKelamin = input("Masukkan jenis kelamin (L/P) : ")
+
+            if not validate_gender(jenisKelamin):
                 print("Jenis kelamin tidak valid!")
                 continue
 
-            td = input("Masukkan nomor tempat duduk: ")
+            tempatDuduk = input("Masukkan nomor tempat duduk  : ")
 
-            if not validate_seat_number(jk, td, occupied_seats):
+            if not validate_seat_number(jenisKelamin, tempatDuduk, occupied_seats):
                 print("Nomor tempat duduk tidak valid atau sudah ditempati!")
                 continue
 
-            occupied_seats.add(int(td))
-            queue.enqueue({"np": np, "ap": ap, "jk": jk.upper(), "td": td})
+            occupied_seats.add(int(tempatDuduk))
+            queue.enqueue({"np": namaPenumpang, "ap": alamatPenumpang, "jk": jenisKelamin.upper(), "td": tempatDuduk})
+            bonus = check_bonus(grand_total, jenisTiket)
+            print("")
+            print(f"Bonus Anda           :          {bonus}")
+            print_ticket(namaPenumpang, alamatPenumpang, jenisKelamin, tempatDuduk, jumlahBeli, harga)
+            print(f"Pajak Pembayaran Anda Adalah       : Rp. {int(total_pajak)}")
+            print(f"Total Pembayaran Anda Adalah       : Rp. {int(grand_total)}")
+            uang_pembayaran = int(input("Masukan uang pembayaran            : Rp. "))
+            if not validate_uang_pembayaran(uang_pembayaran, grand_total):
+                print("Uang pembayaran harus lebih dari total pembayaran")
+                continue
+
+            kembalian = uang_pembayaran - grand_total
+            print(f"Uang kembalian adalah              : Rp. {int(kembalian)}")
+
+            cancel = input(f"Ingin membatalkan pembelian? (y/t) : ")
+
+            if cancel.upper() == 'Y':
+                queue.dequeue()
 
         elif choice == "2":
             queue.dequeue()
