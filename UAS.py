@@ -126,6 +126,62 @@ class Queue:
         print("Queue telah di-sort berdasarkan nama penumpang menggunakan Bubble Sort.")
 
 
+class Stack:
+    def __init__(self, max_size):
+        self.max_size = max_size
+        self.top = -1
+        self.data = [None] * self.max_size
+
+    def is_full(self):
+        return self.top == self.max_size - 1
+
+    def is_empty(self):
+        return self.top == -1
+
+    def push(self, value):
+        if self.is_full():
+            print("History penuh, tidak bisa menambahkan data.")
+        else:
+            self.top += 1
+            self.data[self.top] = value
+            print(f"Pembelian {value['np']} ditambahkan ke history.")
+
+    def pop(self):
+        if self.is_empty():
+            print("History kosong, tidak ada data untuk dihapus.")
+        else:
+            value = self.data[self.top]
+            self.data[self.top] = None
+            self.top -= 1
+            print(f"Data {value['np']} dihapus dari history.")
+
+    def print_stack(self):
+        if self.is_empty():
+            print("History kosong.")
+        else:
+            table = Table(title="Riwayat Pembelian Tiket")
+            table.add_column("Index", justify="center")
+            table.add_column("Nama Penumpang", justify="left")
+            table.add_column("Alamat Penumpang", justify="left")
+            table.add_column("Jenis Kelamin", justify="center")
+            table.add_column("No Tempat Duduk", justify="center")
+            table.add_column("Total Biaya", justify="right")
+
+            for i in range(self.top, -1, -1):
+                p = self.data[i]
+                table.add_row(
+                    str(i + 1),
+                    p["np"],
+                    p["ap"],
+                    p["jk"],
+                    p["td"],
+                    f"Rp. {p['tb']:,}",
+                )
+
+            console = Console()
+            console.print(table)
+
+
 def validate_gender(jk):
     return jk.upper() in ('L', 'P')
 
@@ -228,6 +284,8 @@ if __name__ == "__main__":
 
     queue = Queue(queue_size)
     occupied_seats = set()
+    stack_size = 100
+    history_stack = Stack(stack_size)
 
     while True:
         print("\nMenu:")
@@ -237,6 +295,8 @@ if __name__ == "__main__":
         print("4. Cari data dalam queue")
         print("5. Sorting data dalam queue")
         print("6. Bersihkan queue")
+        print("7. History Stack")
+        print("8. Hapus transaksi terakhir")
         print("0. Keluar")
 
         choice = input("Pilih menu: ")
@@ -317,6 +377,14 @@ if __name__ == "__main__":
 
             if cancel.upper() == 'Y':
                 queue.dequeue()
+            else:
+                history_stack.push({
+                    "np": namaPenumpang,
+                    "ap": alamatPenumpang,
+                    "jk": jenisKelamin.upper(),
+                    "td": tempatDuduk,
+                    "tb": grand_total
+                })
 
         elif choice == "2":
             queue.dequeue()
@@ -335,6 +403,12 @@ if __name__ == "__main__":
         elif choice == "6":
             queue.clear()
             occupied_seats.clear()
+
+        elif choice == "7":
+            history_stack.print_stack()
+
+        elif choice == "8":
+            history_stack.pop()
 
         elif choice == "0":
             print("Keluar dari program. Sampai jumpa!")
